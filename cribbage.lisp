@@ -112,11 +112,22 @@
       (format t "runs: ~A~%" (length lengths))
       (reduce #'+ lengths))))
 
+(defun has-same-suit (cards)
+  (let* ((expected-suit (suit (car cards)))
+         (wrong         (remove-if #'(lambda (a) (eql (suit a) expected-suit)) cards)))
+    (eql (length wrong) 0)))
+
+(defun score-flush (hand start-card crib)
+  (cond
+    ((has-same-suit (cons start-card hand)) (+ (length hand) 1))
+    ((and (not crib) (has-same-suit hand)) (length hand))
+    (t 0)))
+
 (defun score-hand (hand start-card &key crib)
   "Returns the number of points a hand scores"
   (+
+    (score-flush hand start-card crib)
     (score-runs hand start-card)
     (if (his-nobs hand start-card) 1 0)
     (* 2 (count-pairs hand start-card))
     (* 2 (count-15s hand start-card))))
-    ;TODO (score-flush hand start-card)
