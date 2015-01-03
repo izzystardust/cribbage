@@ -103,11 +103,11 @@
     (t (sub-search l (cdr l-of-l)))))
 
 (defun score-runs (hand start-card)
-  (let* ((cards (cons start-card hand))
-         (possible-runs (map 'list #'sort-hand (possible-combinations cards)))
+  (let* ((cards          (sort-hand (cons start-card hand)))
+         (possible-runs  (possible-combinations cards))
          (runs-with-subs (remove-if-not #'run-p possible-runs))
-         (runs (remove-if #'(lambda (run) (sub-search run runs-with-subs)) runs-with-subs))
-         (lengths (map 'list #'length runs)))
+         (runs           (remove-if #'(lambda (run) (sub-search run runs-with-subs)) runs-with-subs))
+         (lengths        (map 'list #'length runs)))
     (progn
       (format t "runs: ~A~%" (length lengths))
       (reduce #'+ lengths))))
