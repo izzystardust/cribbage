@@ -49,10 +49,13 @@
 
 (defun count-15s (hand start-card)
   (let* ((cards (cons start-card hand))
-         (possible-15s (possible-combinations cards)))
-    (count-if
-      #'(lambda (c) (eql (sum-hand c) 15))
-      possible-15s)))
+         (possible-15s (possible-combinations cards))
+         (num-15s (count-if
+                    #'(lambda (c) (eql (sum-hand c) 15))
+                    possible-15s)))
+    (progn
+      (format t "15s: ~a~%" num-15s)
+      num-15s)))
 
 (defun pair-p (cards)
   (if (eql (length cards) 2)
@@ -60,8 +63,11 @@
 
 (defun count-pairs (hand start-card)
   (let* ((cards (cons start-card hand))
-         (possible-pairs (possible-combinations cards)))
-    (count-if #'pair-p possible-pairs)))
+         (possible-pairs (possible-combinations cards))
+         (pair-count (count-if #'pair-p possible-pairs)))
+    (progn
+      (format t "pairs: ~a~%" pair-count)
+      pair-count)))
 
 (defun find-jacks (cards)
   (remove-if-not
@@ -79,25 +85,26 @@
          (find-jacks hand))))
 
 (defun run-p (cards)
-  (let* ((sorted (sort-hand cards))
-         (fst-val (rank (first sorted)))
-         (scd-val (rank (second sorted))))
+  (let* ((fst-val (rank (first cards)))
+         (scd-val (rank (second cards))))
     (cond
       ((null cards) nil)
-      ((eql (length sorted) 2) (eql (+ fst-val 1) scd-val))
-      ((eql (+ fst-val 1) scd-val) (run-p (cdr sorted)))
+      ((eql (length cards) 2) (eql (+ fst-val 1) scd-val))
+      ((eql (+ fst-val 1) scd-val) (run-p (cdr cards)))
       (t nil))))
 
 (defun sub-search (l l-of-l)
   "sub-search searches the lists inside l-of-l for l and returns true if found, nil otherwise"
   (cond
     ((null l-of-l) nil)
-    ((and (search l (car l-of-l) :test #'equal) (not (equal l (car l-of-l)))) t)
+    ((and
+       (search l (car l-of-l) :test #'equal)
+       (not (equal l (car l-of-l)))) t)
     (t (sub-search l (cdr l-of-l)))))
 
 (defun score-runs (hand start-card)
   (let* ((cards (cons start-card hand))
-         (possible-runs (possible-combinations cards)) ;borked?
+         (possible-runs (map 'list #'sort-hand (possible-combinations cards)))
          (runs-with-subs (remove-if-not #'run-p possible-runs))
          (runs (remove-if #'(lambda (run) (sub-search run runs-with-subs)) runs-with-subs))
          (lengths (map 'list #'length runs)))
