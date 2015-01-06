@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/deckarep/golang-set"
 )
 
 func main() {
@@ -27,11 +29,32 @@ func main() {
 		})
 	}
 	fmt.Println(startCard)
-	fmt.Println(hand)
+	fmt.Println(hand.PowerSet())
 
 }
 
 type Hand []Card
+
+func (h Hand) PowerSet() []Hand {
+	// ew.
+	asInterface := make([]interface{}, len(h))
+	for i, v := range h {
+		asInterface[i] = interface{}(v)
+	}
+	setRep := mapset.NewSetFromSlice(asInterface)
+	power := setRep.PowerSet().ToSlice()
+	fmt.Println(power)
+	ret := make([]Hand, len(power))
+	for i, v := range power {
+		subsetAsI := v.(mapset.Set).ToSlice()
+		subset := make(Hand, len(subsetAsI))
+		for j, vv := range subsetAsI {
+			subset[j] = vv.(Card)
+		}
+		ret[i] = subset
+	}
+	return ret
+}
 
 func (h Hand) Len() int           { return len(h) }
 func (h Hand) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
