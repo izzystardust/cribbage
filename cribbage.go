@@ -29,11 +29,34 @@ func main() {
 		})
 	}
 	fmt.Println(startCard)
-	fmt.Println(hand.PowerSet())
+	fmt.Println(hand.Score(startCard))
 
 }
 
 type Hand []Card
+
+func (h Hand) Score(start Card) int {
+	return 2 * append(h, start).Fifteens()
+}
+
+func (h Hand) Fifteens() int {
+	count := 0
+	possible15s := h.PowerSet()
+	for _, v := range possible15s {
+		if v.Sum() == 15 {
+			count += 1
+		}
+	}
+	return count
+}
+
+func (h Hand) Sum() int {
+	sum := 0
+	for _, v := range h {
+		sum += v.Value()
+	}
+	return sum
+}
 
 func (h Hand) PowerSet() []Hand {
 	// ew.
@@ -71,6 +94,13 @@ func (h Hand) String() string {
 type Card struct {
 	rank Rank
 	suit Suit
+}
+
+func (c Card) Value() int {
+	if c.rank > 10 {
+		return 10
+	}
+	return int(c.rank)
 }
 
 func (c Card) String() string {
