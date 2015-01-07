@@ -185,11 +185,19 @@ mod card {
 }
 
 fn main() {
-    let cards = vec![
+    let high_score = vec![
         card::new(5, 'H'),
         card::new(5, 'D'),
         card::new(5, 'C'),
         card::new(11, 'S'),
         ];
-    println!("{}", card::score(cards, card::new(5, 'S'), false));
+
+    let nineteen = vec![
+        card::new(4, 'S'),
+        card::new(6, 'C'),
+        card::new(8, 'H'),
+        card::new(12, 'D'),
+    ];
+    println!("{}", card::score(high_score, card::new(5, 'S'), false));
+    println!("{}", card::score(nineteen, card::new(10, 'D'), false));
 }
