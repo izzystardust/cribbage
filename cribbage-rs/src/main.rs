@@ -31,15 +31,20 @@ mod card {
         let mut runs = Vec::new();
         let mut run: Vec<Card> = Vec::new();
         for card in cpy.iter() {
+            //println!("Looking at {} and {}", card, run);
             if run.len() == 0 || run[run.len()-1].clone().rank + Rank(1) == card.rank {
                 run.push(card.clone())
             } else {
-                runs.push(run);
+                if run.len() > 1 {
+                    runs.push(run);
+                }
                 run = Vec::new();
                 run.push(card.clone());
             }
         }
-        runs.push(run);
+        if run.len() > 1 {
+            runs.push(run);
+        }
         runs.iter()
             .map(|x| x.len() as i32)
             .sum()
