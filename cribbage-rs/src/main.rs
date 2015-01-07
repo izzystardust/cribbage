@@ -4,12 +4,21 @@ mod card {
     use std::ops::Add;
     use std::slice;
 
-    pub fn score(hand: Vec<Card>, start_card: Card) -> i32 {
+    pub fn score(hand: Vec<Card>, start_card: Card, crib: bool) -> i32 {
         let mut with_start = hand.clone();
-        with_start.push(start_card);
-        2 * count_15s(&with_start)
-            + 2 * count_pairs(&with_start)
-            + score_runs(&with_start)
+        with_start.push(start_card.clone());
+        let fifteens = count_15s(&with_start);
+        let pairs = count_pairs(&with_start);
+        let flushpoints = score_flushes(&hand, start_card, crib);
+        let runpoints = score_runs(&with_start);
+        println!("fifteens: {}", fifteens);
+        println!("pairs:    {}", pairs);
+        println!("flush:    {} points", flushpoints);
+        println!("runs:     {} points", runpoints);
+        2 * fifteens
+            + 2 * pairs
+            + flushpoints
+            + runpoints
     }
 
     fn count_15s(cards: &Vec<Card>) -> i32 {
@@ -48,6 +57,19 @@ mod card {
         runs.iter()
             .map(|x| x.len() as i32)
             .sum()
+    }
+
+    fn score_flushes(cards: &Vec<Card>, start: Card, crib: bool) -> i32 {
+        let mut cards = cards.clone();
+        let expected_suit = cards.pop().unwrap().suit;
+        let four_flush = cards.iter()
+            .fold(true, |so_far, next| so_far && next.suit == expected_suit);
+        match (four_flush, start.suit==expected_suit, !crib) {
+            (true, true, _)      => 5,
+            (true, false, true)  => 4,
+            (true, false, false) => 0,
+            (false, _, _)        => 0,
+        }
     }
 
     fn power_set<'a, T: Clone + 'a>(items: &mut slice::Iter<'a,T>) -> Vec<Vec<T>> {
@@ -155,10 +177,10 @@ mod card {
 
 fn main() {
     let cards = vec![
-        card::new(12, 'H'),
-        card::new(11, 'S'),
-        card::new(10, 'S'),
+        card::new(5, 'H'),
+        card::new(5, 'D'),
         card::new(5, 'C'),
+        card::new(11, 'S'),
         ];
-    println!("{}", card::score(cards, card::new(4, 'D')));
+    println!("{}", card::score(cards, card::new(5, 'S'), false));
 }
