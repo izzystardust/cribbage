@@ -11,14 +11,17 @@ mod card {
         let pairs = count_pairs(&with_start);
         let flushpoints = score_flushes(&hand, start_card, crib);
         let runpoints = score_runs(&with_start);
+        let nobs = if his_nobs(&hand, start_card) {1} else {0};
         println!("fifteens: {}", fifteens);
         println!("pairs:    {}", pairs);
         println!("flush:    {} points", flushpoints);
         println!("runs:     {} points", runpoints);
+        println!("his nobs: {}", nobs);
         2 * fifteens
             + 2 * pairs
             + flushpoints
             + runpoints
+            + nobs
     }
 
     fn count_15s(cards: &Vec<Card>) -> i32 {
@@ -72,6 +75,12 @@ mod card {
         }
     }
 
+    fn his_nobs(cards: &Vec<Card>, start: Card) -> bool {
+        cards.iter()
+            .filter(|x| x.rank == Rank(11))
+            .fold(false, |sofar, jack| sofar || jack.suit == start.suit)
+    }
+
     fn power_set<'a, T: Clone + 'a>(items: &mut slice::Iter<'a,T>) -> Vec<Vec<T>> {
         let mut power = Vec::new();
         match items.next() {
@@ -87,7 +96,7 @@ mod card {
         power
     }
 
-    #[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
     struct Card {
         rank: Rank,
         suit: Suit,
@@ -103,7 +112,7 @@ mod card {
         }
     }
 
-    #[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
     enum Suit {
         Spades,
         Hearts,
@@ -138,7 +147,7 @@ mod card {
         }
     }
 
-    #[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
     struct Rank(i32);
 
     impl fmt::Show for Rank {
