@@ -6,7 +6,7 @@ mod card {
 
     pub fn score(hand: Vec<Card>, start_card: Card, crib: bool) -> i32 {
         let mut with_start = hand.clone();
-        with_start.push(start_card.clone());
+        with_start.push(start_card);
         let fifteens = count_15s(&with_start);
         let pairs = count_pairs(&with_start);
         let flushpoints = score_flushes(&hand, start_card, crib);
@@ -44,14 +44,14 @@ mod card {
         let mut run: Vec<Card> = Vec::new();
         for card in cpy.iter() {
             //println!("Looking at {} and {}", card, run);
-            if run.len() == 0 || run[run.len()-1].clone().rank + Rank(1) == card.rank {
-                run.push(card.clone())
+            if run.len() == 0 || run[run.len()-1].rank + Rank(1) == card.rank {
+                run.push(*card)
             } else {
                 if run.len() > 1 {
                     runs.push(run);
                 }
                 run = Vec::new();
-                run.push(card.clone());
+                run.push(*card);
             }
         }
         if run.len() > 1 {
