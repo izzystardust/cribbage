@@ -33,32 +33,30 @@ func main() {
 
 }
 
+// +gen slice:"Where"
 type Hand []Card
 
 func (h Hand) Score(start Card) int {
-	return 2 * append(h, start).Fifteens()
+	fifteens := append(h, start).Fifteens()
+	pairs := append(h, start).Pairs()
+	fmt.Println("fifteens:", fifteens)
+	fmt.Println("pairs:   ", pairs)
+	return 2*fifteens + 2*pairs
 }
 
 func (h Hand) Fifteens() int {
-	count := 0
-	possible15s := h.PowerSet()
-	for _, v := range possible15s {
-		if v.Sum() == 15 {
-			count += 1
-		}
-	}
-	return count
+	return len(h.PowerSet().Where(func(a Hand) bool { return a.Sum() == 15 }))
+}
+
+func (h Hand) Pairs() int {
+	return len(h.PowerSet().Where(func(a Hand) bool { return len(a) == 2 }).Where(func(a Hand) bool { return a[0].rank == a[1].rank }))
 }
 
 func (h Hand) Sum() int {
-	sum := 0
-	for _, v := range h {
-		sum += v.Value()
-	}
-	return sum
+	return CardSlice(h).AggregateInt(func(v int, c Card) int { return v + c.Value() })
 }
 
-func (h Hand) PowerSet() []Hand {
+func (h Hand) PowerSet() HandSlice {
 	// ew.
 	asInterface := make([]interface{}, len(h))
 	for i, v := range h {
@@ -66,7 +64,6 @@ func (h Hand) PowerSet() []Hand {
 	}
 	setRep := mapset.NewSetFromSlice(asInterface)
 	power := setRep.PowerSet().ToSlice()
-	fmt.Println(power)
 	ret := make([]Hand, len(power))
 	for i, v := range power {
 		subsetAsI := v.(mapset.Set).ToSlice()
@@ -91,6 +88,7 @@ func (h Hand) String() string {
 	return ret
 }
 
+// +gen slice:"Aggregate[int]"
 type Card struct {
 	rank Rank
 	suit Suit
